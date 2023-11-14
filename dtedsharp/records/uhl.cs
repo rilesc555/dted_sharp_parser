@@ -6,17 +6,17 @@ using latlon;
 
 namespace uhl {
     public class UserHeaderLabel {
-        LatLon? origin { get; init; }
-        float longitude_interval { get; init; }
-        float latitude_interval { get; init; }
-        int? vertical_accuracy { get; init; }
-        byte[]? security_code { get; init; }
-        byte[]? reference { get; init; }
-        Tuple<int, int>? shape { get; init; }
-        bool multiple_accuracy { get; init; }
-        byte[]? _data { get; init; }
+        LatLon? Origin { get; init; }
+        float Longitude_interval { get; init; }
+        float Latitude_interval { get; init; }
+        int? Vertical_accuracy { get; init; }
+        byte[]? Security_code { get; init; }
+        byte[]? Reference { get; init; }
+        Tuple<int, int>? Shape { get; init; }
+        bool Multiple_accuracy { get; init; }
+        byte[]? Data { get; init; }
 
-        private static readonly byte[] _SENTINEL = "UHL"u8.ToArray();
+        private static readonly byte[] _SENTINEL = "UHL1"u8.ToArray();
 
         private UserHeaderLabel() {}
         public static UserHeaderLabel FromBytes(byte[] data) {
@@ -26,12 +26,31 @@ namespace uhl {
 
             using (var bufferedData = new MemoryStream(data)) {
                 var sentinel = new byte[3];
-                bufferedData.Read(sentinel, 0, 3);
+                bufferedData.Read(sentinel, 0, 4);
                 if (!Helpers.CompareArrays(sentinel, _SENTINEL)) {
-                    throw new Helpers.InvalidFileException("Data Set Identification Records must start with 'DSI'");
+                    throw new Helpers.InvalidFileException("Data Set Identification Records must start with 'UHL'");
                 }
 
-                
+                LatLon origin = LatLon.FromDted(Helpers.ReadString(bufferedData, 8), Helpers.ReadString(bufferedData, 8));
+                float longitude_interval = Helpers.ReadFloat(bufferedData, 4);
+                float latitude_interval = Helpers.ReadFloat(bufferedData, 4);
+                int vertical_accuracy = Helpers.ReadInt(bufferedData, 4);
+                byte[] security_code = Helpers.ReadBytes(bufferedData, 3);
+                byte[] reference = Helpers.ReadBytes(bufferedData, 12);
+                Tuple<int, int> shape = new (Helpers.ReadInt(bufferedData, 4), Helpers.ReadInt(bufferedData, 4));
+                bool multiple_accuracy = Helpers.ReadInt(bufferedData, 1) == 1;
+
+                return new UserHeaderLabel() {
+                    Origin = origin,
+                    Longitude_interval = longitude_interval,
+                    Latitude_interval = latitude_interval,
+                    Vertical_accuracy = vertical_accuracy,
+                    Security_code = security_code,
+                    Reference = reference,
+                    Shape = shape,
+                    Multiple_accuracy = multiple_accuracy,
+                    Data = data
+                };
             }
         }
     }
