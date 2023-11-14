@@ -1,6 +1,6 @@
 using System;
 
-namespace latlon {
+namespace dtedsharp.latlon {
 public class LatLon
 {
     public double Latitude { get; }
@@ -41,6 +41,7 @@ public class LatLon
 
         string latitudeStr = $"{Math.Abs(Latitude).ToString($"F{precision}")}{latitudeHemisphere}";
         string longitudeStr = $"{Math.Abs(Longitude).ToString($"F{precision}")}{longitudeHemisphere}";
+        return $"{latitudeStr}{longitudeStr}";
 
     }
 

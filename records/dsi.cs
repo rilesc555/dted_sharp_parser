@@ -4,7 +4,7 @@ using System.Text;
 using definitions;
 using latlon;
 
-namespace dsi {
+namespace records.dsi {
 public class DataSetIdentification
     {
 

@@ -1,4 +1,4 @@
-namespace definitions
+namespace dtedsharp.definitions
 {
     public static class Helpers
     {
@@ -28,7 +28,7 @@ namespace definitions
         public static string ReadString(Stream stream, int length) {
             var bytes = new byte[length];
             stream.Read(bytes, 0, length);
-            return Encoding.ASCII.GetString(bytes);
+            return System.Text.Encoding.ASCII.GetString(bytes);
         }
 
         public static int ReadInt(Stream stream, int length)

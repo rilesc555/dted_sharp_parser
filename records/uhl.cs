@@ -4,7 +4,7 @@ using System.Text;
 using definitions;
 using latlon;
 
-namespace uhl {
+namespace records.uhl {
     public class UserHeaderLabel {
         LatLon? Origin { get; init; }
         float Longitude_interval { get; init; }
