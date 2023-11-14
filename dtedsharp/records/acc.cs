@@ -23,18 +23,18 @@ namespace acc{
 
         public static AccuracyDescription FromBytes(byte[] data)
         {
-            if (data.Length < Constants.ACC_SIZE)
+            if (data.Length < Helpers.ACC_SIZE)
             {
-                throw new ArgumentException($"The Accuracy Description record is {Constants.ACC_SIZE} bytes but was provided {data.Length} bytes");
+                throw new ArgumentException($"The Accuracy Description record is {Helpers.ACC_SIZE} bytes but was provided {data.Length} bytes");
             }
 
             using (var bufferedData = new MemoryStream(data))
             {
                 var sentinel = new byte[3];
                 bufferedData.Read(sentinel, 0, 3);
-                if (!CompareArrays(sentinel, _SENTINEL))
+                if (!Helpers.CompareArrays(sentinel, _SENTINEL))
                 {
-                    throw new InvalidFileException($"Accuracy Description Records must start with '{System.Text.Encoding.ASCII.GetString(_SENTINEL)}'. Found: {System.Text.Encoding.ASCII.GetString(sentinel)}");
+                    throw new Helpers.InvalidFileException($"Accuracy Description Records must start with '{System.Text.Encoding.ASCII.GetString(_SENTINEL)}'. Found: {System.Text.Encoding.ASCII.GetString(sentinel)}");
                 }
 
                 var absHorBytes = new byte[4];
@@ -56,16 +56,6 @@ namespace acc{
             }
         }
 
-        private static bool CompareArrays(byte[] array1, byte[] array2)
-        {
-            if (array1.Length != array2.Length) return false;
-            for (int i = 0; i < array1.Length; i++)
-            {
-                if (array1[i] != array2[i]) return false;
-            }
-            return true;
-        }
-
         private static int? TryConvertToInt(byte[] bytes)
         {
             if (bytes.Length < 4) return null;
@@ -73,10 +63,5 @@ namespace acc{
         }
     }
 
-    public class InvalidFileException : Exception
-    {
-        public InvalidFileException(string message) : base(message)
-        {
-        }
-    }
+    
 }

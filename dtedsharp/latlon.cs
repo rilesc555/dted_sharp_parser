@@ -1,5 +1,6 @@
 using System;
 
+namespace latlon {
 public class LatLon
 {
     public double Latitude { get; }
@@ -59,4 +60,5 @@ public class LatLon
 
         return (degrees, minutes, seconds);
     }
+}
 }
