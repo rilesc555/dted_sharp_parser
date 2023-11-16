@@ -4,7 +4,7 @@ using System.Text;
 using definitions;
 using latlon;
 
-namespace records.uhl {
+namespace uhl {
     public class UserHeaderLabel {
         LatLon? Origin { get; init; }
         float Longitude_interval { get; init; }
@@ -25,7 +25,7 @@ namespace records.uhl {
             }
 
             using (var bufferedData = new MemoryStream(data)) {
-                var sentinel = new byte[3];
+                var sentinel = new byte[4];
                 bufferedData.Read(sentinel, 0, 4);
                 if (!Helpers.CompareArrays(sentinel, _SENTINEL)) {
                     throw new Helpers.InvalidFileException("Data Set Identification Records must start with 'UHL'");

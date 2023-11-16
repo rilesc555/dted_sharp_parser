@@ -1,6 +1,6 @@
 using System;
 
-namespace dtedsharp.latlon {
+namespace latlon {
 public class LatLon
 {
     public double Latitude { get; }
@@ -53,11 +53,12 @@ public class LatLon
     public static (int, int, double) ParseDmsCoordinate(string coordinate)
     {
         int secondsIndex = coordinate[^2] == '.' ? -4 : -2;
+        secondsIndex = coordinate.Length + secondsIndex;
         int minutesIndex = secondsIndex - 2;
 
-        int degrees = int.Parse(coordinate[..minutesIndex]);
+        int degrees = int.Parse(coordinate.Substring(0, minutesIndex));
         int minutes = int.Parse(coordinate.Substring(minutesIndex, 2));
-        double seconds = double.Parse(coordinate.Substring(coordinate.Length + secondsIndex));
+        double seconds = double.Parse(coordinate.Substring(secondsIndex));
 
         return (degrees, minutes, seconds);
     }

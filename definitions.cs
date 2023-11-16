@@ -1,4 +1,4 @@
-namespace dtedsharp.definitions
+namespace definitions
 {
     public static class Helpers
     {
@@ -33,9 +33,12 @@ namespace dtedsharp.definitions
 
         public static int ReadInt(Stream stream, int length)
         {
-            var bytes = new byte[length];
+            var bytes = new byte[4]; // Always create a 4-byte array
             stream.Read(bytes, 0, length);
-            return BitConverter.ToInt32(bytes, 0);
+
+            string temp = System.Text.Encoding.ASCII.GetString(bytes);
+
+            return int.Parse(temp);
         }
 
         public static byte[] ReadBytes(Stream stream, int length)
@@ -48,13 +51,13 @@ namespace dtedsharp.definitions
         public static DateTime? ReadDate(Stream stream, int length)
         {
             var dateString = ReadString(stream, length);
-            if (dateString == "00000000")
+            if (dateString == "0000")
             {
                 return null;
             }
             else
             {
-                return DateTime.ParseExact(dateString, "yyyyMMdd", null);
+                return DateTime.ParseExact(dateString, "yyMM", null);
             }
         }
 

@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using dtedsharp.definitions;
+using definitions;
 
-namespace records.acc{
+namespace acc{
     public class AccuracyDescription
     {
         public int? AbsoluteHorizontal { get; private set; }

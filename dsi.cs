@@ -4,7 +4,7 @@ using System.Text;
 using definitions;
 using latlon;
 
-namespace records.dsi {
+namespace dsi {
 public class DataSetIdentification
     {
 
@@ -78,7 +78,7 @@ public class DataSetIdentification
             byte[] ProductSpecification = Helpers.ReadBytes(bufferedData, 11);
             DateTime? SpecificationDate = Helpers.ReadDate(bufferedData, 4);
             string VerticalDatum = Helpers.ReadString(bufferedData, 3);
-            string HorizontalDatum = Helpers.ReadString(bufferedData, 3);
+            string HorizontalDatum = Helpers.ReadString(bufferedData, 5);
             string CollectionSystem = Helpers.ReadString(bufferedData, 10);
             DateTime? CompilationDate = Helpers.ReadDate(bufferedData, 4);
             _data = Helpers.ReadBytes(bufferedData, 22);
@@ -87,11 +87,12 @@ public class DataSetIdentification
             LatLon NorthWestCorner = LatLon.FromDted(Helpers.ReadString(bufferedData, 7), Helpers.ReadString(bufferedData, 8));
             LatLon NorthEastCorner = LatLon.FromDted(Helpers.ReadString(bufferedData, 7), Helpers.ReadString(bufferedData, 8));
             LatLon SouthEastCorner = LatLon.FromDted(Helpers.ReadString(bufferedData, 7), Helpers.ReadString(bufferedData, 8));
-            float Orientation = Helpers.ReadFloat(bufferedData, 9);
+            float Orientation = Helpers.ReadFloat(bufferedData, 9) / 10;
             float LatitudeInterval = Helpers.ReadFloat(bufferedData, 4) / 10;
             float LongitudeInterval = Helpers.ReadFloat(bufferedData, 4) / 10;
-            Tuple<int, int> Shape = new(Helpers.ReadInt(bufferedData, 4), Helpers.ReadInt(bufferedData, 4));
-            float Coverage = Helpers.ReadFloat(bufferedData, 2);
+            Tuple<int, int> tempShape = new(Helpers.ReadInt(bufferedData, 4), Helpers.ReadInt(bufferedData, 4));
+            Tuple<int, int> Shape = new(tempShape.Item2, tempShape.Item1);
+            int Coverage = Helpers.ReadInt(bufferedData, 2);
 
             return new DataSetIdentification{
                 SecurityCode = SecurityCode,
@@ -126,6 +127,8 @@ public class DataSetIdentification
             }
         }
     
-
+    public int BlockLength() {
+        return 12 + (2 * this.Shape.Item2);
+    }
 }
 }
