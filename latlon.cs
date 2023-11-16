@@ -56,7 +56,7 @@ public class LatLon
         secondsIndex = coordinate.Length + secondsIndex;
         int minutesIndex = secondsIndex - 2;
 
-        int degrees = int.Parse(coordinate.Substring(0, minutesIndex));
+        int degrees = int.Parse(coordinate[..minutesIndex]);
         int minutes = int.Parse(coordinate.Substring(minutesIndex, 2));
         double seconds = double.Parse(coordinate.Substring(secondsIndex));
 

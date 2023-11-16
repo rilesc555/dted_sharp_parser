@@ -9,14 +9,15 @@ using dsi;
 using uhl;
 using MathNet.Numerics;
 using System.ComponentModel.DataAnnotations;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace tile {
     public class Tile {
         string File { get; init; }
-        UserHeaderLabel UHL { get; init; }
-        DataSetIdentification DSI { get; init; }
-        AccuracyDescription ACC { get; init; }
-        MathNet.Numerics.LinearAlgebra.Matrix<float> Data { get; init; }
+        public UserHeaderLabel UHL { get; set; }
+        public DataSetIdentification DSI { get; set; }
+        public AccuracyDescription ACC { get; set; }
+        MathNet.Numerics.LinearAlgebra.Matrix<float> Data { get; set; }
 
         public Tile(string filePath) {
 
@@ -39,7 +40,7 @@ namespace tile {
                     this.ACC = AccuracyDescription.FromBytes(buffer3);
                 }
             }
-
+            // matrix is in <longitude><latitude> format
             this.Data = MathNet.Numerics.LinearAlgebra.Matrix<float>.Build.Dense(this.DSI.Shape.Item1, this.DSI.Shape.Item2);   
             
             this.loadData();
@@ -57,16 +58,17 @@ namespace tile {
                 int bytes = stream.Read(dataRecord, 0, length);
             }
         
-            int blockLength = DSI.BlockLength();
+            if (DSI != null) {
+                int blockLength = DSI.BlockLength();
+                for (int column = 0; column < DSI.Shape.Item1; column++)
+                {
+                    int start = column * blockLength;
+                    int length = blockLength;
+                    byte[] block = new byte[length];
+                    Array.Copy(dataRecord, start, block, 0, length);
 
-            for (int column = 0; column < DSI.Shape.Item1; column++)
-            {
-                int start = column * blockLength;
-                int length = blockLength;
-                byte[] block = new byte[length];
-                Array.Copy(dataRecord, start, block, 0, length);
-
-                this.Data.SetColumn(column, parseData(block));
+                    this.Data.SetColumn(column, parseData(block));
+                }
             }
 
         }
@@ -93,6 +95,20 @@ namespace tile {
         private static short ReverseBytes(short value)
         {
             return (short)((value << 8) | ((value >> 8) & 0xFF));
+        }
+    
+        public float getElevation(LatLon latlon) {
+            double originLat = this.DSI.Origin.Latitude;
+            double originLon = this.DSI.Origin.Longitude;
+
+            int lon_count = this.DSI.Shape.Item1;
+            int lat_count = this.DSI.Shape.Item2;
+
+            int lat_index = (int)Math.Round(latlon.Latitude - originLat) * (lat_count - 1);
+            int lon_index = (int)Math.Round(latlon.Longitude - originLon) * (lon_count - 1);
+
+             return this.Data[lon_index, lat_index];
+
         }
     }
 }
