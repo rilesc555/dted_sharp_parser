@@ -23,7 +23,7 @@ public class DataSetIdentification
     public DateTime? SpecificationDate { get; init; }
     public string? VerticalDatum { get; init; }
     public string? HorizontalDatum { get; init; }
-    public string? CollectionSystem { get; init; }
+    public string? CollectionSystem {  get; protected set; }
     public DateTime? CompilationDate { get; init; }
 
     public LatLon? Origin { get; init; }

@@ -2,9 +2,16 @@
 using latlon;
 using tile;
 
-Tile sampleTile = new Tile("/Users/riley/Projects/dted parse/dted/test/data/n41_w071_1arc_v3.dt2");
+Tile sampleTile = new Tile("/Users/riley/Projects/n41_w071_1arc_v3.dt2");
 
-Console.WriteLine($"{sampleTile.DSI.SouthWestCorner.Latitude}, {sampleTile.DSI.SouthWestCorner.Longitude}");
-Console.WriteLine($"{sampleTile.DSI.NorthEastCorner.Latitude}, {sampleTile.DSI.SouthEastCorner.Longitude}");    
+short ReverseBytes(short value)
+    {
+        return (short)((value << 8) | ((value >> 8) & 0xFF));
+    }
 
-Console.WriteLine(sampleTile.getElevation(new LatLon(41.5, -70.5)));
+short testShort = BitConverter.ToInt16(new byte[] { 0, 5 }, 0);
+
+Console.WriteLine(testShort);
+
+Console.WriteLine(ReverseBytes(testShort));
+

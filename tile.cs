@@ -17,7 +17,7 @@ namespace tile {
         public UserHeaderLabel UHL { get; set; }
         public DataSetIdentification DSI { get; set; }
         public AccuracyDescription ACC { get; set; }
-        MathNet.Numerics.LinearAlgebra.Matrix<float> Data { get; set; }
+        public MathNet.Numerics.LinearAlgebra.Matrix<float> Data { get; set; }
 
         public Tile(string filePath) {
 
@@ -51,9 +51,9 @@ namespace tile {
         private void loadData() {
             byte[] dataRecord;
             using (FileStream stream = new FileStream(File, FileMode.Open, FileAccess.Read)){
-                int startingPosition = Helpers.UHL_SIZE + Helpers.DSI_SIZE + Helpers.ACC_SIZE;
-                stream.Seek(startingPosition, SeekOrigin.Begin);
-                int length = (int)stream.Length - startingPosition;
+                long startingPosition = (long)(Helpers.UHL_SIZE + Helpers.DSI_SIZE + Helpers.ACC_SIZE);
+                stream.Position = startingPosition;
+                int length = (int)stream.Length - (int)startingPosition;
                 dataRecord = new byte[length];
                 int bytes = stream.Read(dataRecord, 0, length);
             }
@@ -67,30 +67,33 @@ namespace tile {
                     byte[] block = new byte[length];
                     Array.Copy(dataRecord, start, block, 0, length);
 
-                    this.Data.SetColumn(column, parseData(block));
+                    this.Data.SetColumn(column, parseData(block, column));
                 }
             }
 
         }
         // returns vector representing a longitudinal slice going from south to north
-        private MathNet.Numerics.LinearAlgebra.Vector<float> parseData(byte[] block) {
-            using (var stream = new MemoryStream(block, 8, block.Length - 12)) // Skip first 8 bytes and last 4 bytes
-                using (var reader = new BinaryReader(stream))
-                {
-                    int elementCount = (block.Length - 12) / 2; // Calculate the number of 16-bit integers
-                    var data = new float[elementCount];
-
-                    for (int i = 0; i < elementCount; i++)
-                    {
-                        short value = reader.ReadInt16(); // Read 16-bit integer
-                        int temp = BitConverter.IsLittleEndian ? ReverseBytes(value) : value; // Convert to big-endian if necessary
-                        float fvalue = (float)value;
-                        data[i] = fvalue;
-                    }
-
-                    return MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(data);
+        private MathNet.Numerics.LinearAlgebra.Vector<float> parseData(byte[] block, int column) {
+            float[] parsedData = new float[DSI.Shape.Item2];
+            for (int i = 0; i < parsedData.Length; i++) {
+                short value = BitConverter.ToInt16(block, i * 2 + 8);
+                if (BitConverter.IsLittleEndian) {
+                    value = ReverseBytes(value);
                 }
-        }
+                parsedData[i] = (float)value;
+                if (i > 1857) {
+                    Console.WriteLine("parsedData[" + i + "] = " + parsedData[i]);
+                }
+            }
+            Vector<float> columnVector = Vector<float>.Build.Dense(parsedData);
+            using (StreamWriter writer = new StreamWriter("parsedData.txt", true)) {
+                writer.WriteLine(columnVector);
+            }
+            
+            Console.WriteLine("columnVector = " + columnVector);
+            return columnVector;
+            }
+        
 
         private static short ReverseBytes(short value)
         {
