@@ -1,17 +1,12 @@
-using System;
-using System.ComponentModel;
-using System.IO;
-using System.Text;
 using definitions;
 using latlon;
 using acc;
 using dsi;
 using uhl;
-using MathNet.Numerics;
-using System.ComponentModel.DataAnnotations;
 using MathNet.Numerics.LinearAlgebra;
 
-namespace tile {
+namespace tile
+{
     public class Tile {
         string File { get; init; }
         public UserHeaderLabel UHL { get; set; }
@@ -66,8 +61,12 @@ namespace tile {
                     int length = blockLength;
                     byte[] block = new byte[length];
                     Array.Copy(dataRecord, start, block, 0, length);
-
-                    this.Data.SetColumn(column, parseData(block, column));
+                    var columnVector = parseData(block, column);
+                    
+                    this.Data.SetColumn(column, columnVector);
+                }
+                using (StreamWriter writer = new StreamWriter("/Users/riley/Projects/dtedsharp/parsedData.csv")) {
+                    MathNet.Numerics.Data.Text.DelimitedWriter.Write(writer, this.Data, ",");
                 }
             }
 
@@ -81,16 +80,10 @@ namespace tile {
                     value = ReverseBytes(value);
                 }
                 parsedData[i] = (float)value;
-                if (i > 1857) {
-                    Console.WriteLine("parsedData[" + i + "] = " + parsedData[i]);
-                }
             }
-            Vector<float> columnVector = Vector<float>.Build.Dense(parsedData);
-            using (StreamWriter writer = new StreamWriter("parsedData.txt", true)) {
-                writer.WriteLine(columnVector);
-            }
-            
-            Console.WriteLine("columnVector = " + columnVector);
+            var V = Vector<float>.Build;
+            var columnVector = V.Dense(parsedData);
+
             return columnVector;
             }
         
