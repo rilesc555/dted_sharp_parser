@@ -1,4 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿// follows, simplifies, and changes to C# the python package at https://github.com/bbonenfant/dted
+
 using latlon;
 using tile;
 
