@@ -3,7 +3,6 @@ using latlon;
 using acc;
 using dsi;
 using uhl;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace tile
 {
@@ -12,7 +11,7 @@ namespace tile
         public UserHeaderLabel UHL { get; set; }
         public DataSetIdentification DSI { get; set; }
         public AccuracyDescription ACC { get; set; }
-        public MathNet.Numerics.LinearAlgebra.Matrix<float> Data { get; set; }
+        public int[][] Data { get; set; }
 
         public Tile(string filePath) {
 
@@ -36,14 +35,14 @@ namespace tile
                 }
             }
             // matrix is in <longitude><latitude> format
-            this.Data = MathNet.Numerics.LinearAlgebra.Matrix<float>.Build.Dense(this.DSI.Shape.Item1, this.DSI.Shape.Item2);   
+            this.Data = new int[this.DSI.Shape.Item1][];   
             
-            this.loadData();
+            this.LoadData();
 
             Console.WriteLine("Loaded tile");
 
         }
-        private void loadData() {
+        private void LoadData() {
             byte[] dataRecord;
             using (FileStream stream = new FileStream(File, FileMode.Open, FileAccess.Read)){
                 long startingPosition = (long)(Helpers.UHL_SIZE + Helpers.DSI_SIZE + Helpers.ACC_SIZE);
@@ -63,28 +62,26 @@ namespace tile
                     Array.Copy(dataRecord, start, block, 0, length);
                     var columnVector = parseData(block, column);
                     
-                    this.Data.SetColumn(column, columnVector);
+                    this.Data[column] = columnVector;
                 }
-                using (StreamWriter writer = new StreamWriter("/Users/riley/Projects/dtedsharp/parsedData.csv")) {
-                    MathNet.Numerics.Data.Text.DelimitedWriter.Write(writer, this.Data, ",");
-                }
+                // using (StreamWriter writer = new StreamWriter("/Users/riley/Projects/dtedsharp/parsedData.csv")) {
+                //     MathNet.Numerics.Data.Text.DelimitedWriter.Write(writer, this.Data, ",");
+                // }
             }
 
         }
         // returns vector representing a longitudinal slice going from south to north
-        private MathNet.Numerics.LinearAlgebra.Vector<float> parseData(byte[] block, int column) {
-            float[] parsedData = new float[DSI.Shape.Item2];
+        private int[] parseData(byte[] block, int column) {
+            int[] parsedData = new int[DSI.Shape.Item2];
             for (int i = 0; i < parsedData.Length; i++) {
                 short value = BitConverter.ToInt16(block, i * 2 + 8);
                 if (BitConverter.IsLittleEndian) {
                     value = ReverseBytes(value);
                 }
-                parsedData[i] = (float)value;
+                parsedData[i] = value;
             }
-            var V = Vector<float>.Build;
-            var columnVector = V.Dense(parsedData);
 
-            return columnVector;
+            return parsedData;
             }
         
 
@@ -93,7 +90,7 @@ namespace tile
             return (short)((value << 8) | ((value >> 8) & 0xFF));
         }
     
-        public float getElevation(LatLon latlon) {
+        public int getElevation(LatLon latlon) {
             double originLat = this.DSI.Origin.Latitude;
             double originLon = this.DSI.Origin.Longitude;
 
@@ -103,7 +100,7 @@ namespace tile
             int lat_index = (int)Math.Round(latlon.Latitude - originLat) * (lat_count - 1);
             int lon_index = (int)Math.Round(latlon.Longitude - originLon) * (lon_count - 1);
 
-             return this.Data[lon_index, lat_index];
+             return this.Data[lon_index][lat_index];
 
         }
     }

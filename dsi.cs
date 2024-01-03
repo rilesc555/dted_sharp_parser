@@ -90,7 +90,9 @@ public class DataSetIdentification
             float Orientation = Helpers.ReadFloat(bufferedData, 9) / 10;
             float LatitudeInterval = Helpers.ReadFloat(bufferedData, 4) / 10;
             float LongitudeInterval = Helpers.ReadFloat(bufferedData, 4) / 10;
+            //read number of latitude lines followed by number of longitude lines
             Tuple<int, int> tempShape = new(Helpers.ReadInt(bufferedData, 4), Helpers.ReadInt(bufferedData, 4));
+            //switch shape to be in <longitude><latitude> format
             Tuple<int, int> Shape = new(tempShape.Item2, tempShape.Item1);
             int Coverage = Helpers.ReadInt(bufferedData, 2);
 
